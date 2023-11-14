@@ -7,58 +7,36 @@
  */
 int _printf(const char *format, ...)
 {
+	match m[] = {
+		{"%c", print_char}, {"%s", print_str}, {"%%", print_per},
+		{"%i", print_int}, {"%d", print_dec}
+	};
 	va_list args;
-	int count = 0;
-
-	if (format == NULL)
-		return (-1);
+	int i = 0, len = 0;
+	int j;
 
 	va_start(args, format);
-
-	while (*format)
+	if (format == NULL || (format[0] == '%' && format[i] == '\0'))
+		return (-1);
+Here:
+	while (format[i] != '\0')
 	{
-		if (*format != '%')
+		j = 13;
+		while (j >= 0)
 		{
-			write(1, format, 1);
-			count++;
+			if (m[j].id[0] == format[i] && m[j].id[i] == format[i + 1])
+			{
+				len = len + m[j].f(args);
+				i = i + 2;
+				goto Here;
+			}
+			j--;
 		}
-		else
-		{
-			format++;
-
-			if (*format == '\0')
-				break;
-
-			if (*format == '%')
-			{
-				write(1, format, 1);
-				count++;
-			}
-
-			else if (*format == 'c')
-			{
-				char c = va_arg(args, int);
-
-				write(1, &c, 1);
-				count++;
-			}
-
-			else if (*format == 's')
-			{
-				char *str = va_arg(args, char*);
-				int string_lenght = 0;
-
-				while (str[string_lenght] != '\0')
-					string_lenght++;
-				write(1, str, string_lenght);
-
-				count += string_lenght;
-			}
-		}
-		format++;
+		_putchar(format[i]);
+		i++;
+		len++;
 	}
-
 	va_end(args);
 
-	return (count);
+	return (len);
 }
