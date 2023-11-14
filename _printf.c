@@ -10,53 +10,55 @@ int _printf(const char *format, ...)
 	va_list args;
 	int count = 0;
 
+	if (format == NULL)
+		return (-1);
+
 	va_start(args, format);
 
-	while (*format != '\0')
+	while (*format)
 	{
-		if (*format == '%')
-		{
-			format++;
-
-			switch (*format)
-			{
-				case 'c':
-					{
-					int c = va_arg(args, int);
-
-					write(1, &c, 1);
-					count++;
-					break;
-					}
-				case 's':
-					{
-					char *s = va_arg(args, char *);
-
-					while (*s != '\0')
-					{
-					write(1, s, 1);
-					s++;
-					count++;
-					}
-					break;
-					}
-				case '%':
-					{
-					write(1, "%", 1);
-					write(1, format, 1);
-					count += 2;
-					break;
-					}
-			}
-		}
-		else
+		if (*format != '%')
 		{
 			write(1, format, 1);
 			count++;
 		}
+		else
+		{
+			format++;
+
+			if (*format == '\0')
+				break;
+
+			if (*format == '%')
+			{
+				write(1, format, 1);
+				count++;
+			}
+
+			else if (*format == 'c')
+			{
+				char c = va_arg(args, int);
+
+				write(1, &c, 1);
+				count++;
+			}
+
+			else if (*format == 's')
+			{
+				char *str = va_arg(args, char*);
+				int string_lenght = 0;
+
+				while (str[string_lenght] != '\0')
+					string_lenght++;
+				write(1, str, string_lenght);
+
+				count += string_lenght;
+			}
+		}
 		format++;
 	}
+
 	va_end(args);
-	
+
 	return (count);
 }
